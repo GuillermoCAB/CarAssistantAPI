@@ -1,20 +1,19 @@
-import sgMail from "@sendgrid/mail";
+import emailjs from "@emailjs/browser";
 
-if (!process.env.SENDGRID_API_KEY) {
-  throw new Error("SENDGRID_API_KEY must be defined");
+if (!process.env.EMAILJS_API_KEY) {
+  throw new Error("EMAILJS_API_KEY must be defined");
 }
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+emailjs.init(process.env.EMAILJS_API_KEY);
 
 async function sendEmail(to: string, subject: string, text: string) {
   const msg = {
-    to, // Change to your recipient
-    from: "youremail@example.com", // Change to your verified sender
+    to,
     subject,
     text,
   };
 
-  await sgMail.send(msg);
+  await emailjs.send("service_j6bzfjj", "template_aj4o5t5", msg);
 }
 
 export default sendEmail;
