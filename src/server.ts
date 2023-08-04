@@ -21,6 +21,5 @@ app.use("/users", usersRoutes);
 app.use("/schedules", scheduleRoutes);
 
 mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  autoIndex: true,
 });

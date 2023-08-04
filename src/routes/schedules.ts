@@ -52,13 +52,15 @@ router.delete("/schedules", authMiddleware, async (req, res) => {
 
   const { date, hour } = req.query;
 
-  const schedule = await Schedule.findOne({ user: req.user.id, date, hour });
+  const schedule = await Schedule.findOneAndDelete({
+    user: req.user.id,
+    date,
+    hour,
+  });
 
   if (!schedule) {
     return res.status(404).json({ message: "Schedule not found" });
   }
-
-  await schedule.remove();
 
   res.json({ message: "Schedule deleted successfully" });
 });

@@ -7,6 +7,10 @@ export const authMiddleware: express.RequestHandler = async (
   res,
   next
 ) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("SENDGRID_API_KEY must be defined");
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -25,13 +29,14 @@ export const authMiddleware: express.RequestHandler = async (
     return res.status(401).json({ message: "Token malformatted" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: "Token invalid" });
-    }
-
-    // add user to request
-    req.user = await User.findById(decoded.userId);
-    return next();
-  });
+  const payload = jwt.verify(token, process.env.JWT_SECRET!);
+  if (typeof payload !== "string" && "userId" in payload) {
+    const user = await User.findById(payload.userId);
+    req.user = user;
+    next();
+  } else {
+    res
+      .sendStatus(403)
+      .json({ message: "Token don't have access to this feature" });
+  }
 };
