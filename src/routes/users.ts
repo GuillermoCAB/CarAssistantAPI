@@ -4,6 +4,7 @@ import crypto from "crypto-js";
 import sendEmail from "../services/emailService";
 import Joi from "@hapi/joi";
 import jwt from "jsonwebtoken";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const registerSchema = Joi.object({
   name: Joi.string().required(),
@@ -120,6 +121,17 @@ router.post("/sendcode", async (req, res) => {
   );
 
   res.json({ message: "Code sent successfully, check your email" });
+});
+
+router.put("/interests", authMiddleware, async (req, res) => {
+  const { interests } = req.body;
+
+  const user = req.user;
+  user.interests = interests;
+
+  await user.save();
+
+  res.json({ message: "Interests updated successfully" });
 });
 
 export default router;
