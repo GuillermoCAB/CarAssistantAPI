@@ -1,4 +1,7 @@
 import emailjs from "@emailjs/browser";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 if (!process.env.EMAILJS_API_KEY) {
   throw new Error("EMAILJS_API_KEY must be defined");

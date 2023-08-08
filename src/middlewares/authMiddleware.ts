@@ -32,6 +32,7 @@ export const authMiddleware: express.RequestHandler = async (
   const payload = jwt.verify(token, process.env.JWT_SECRET!);
   if (typeof payload !== "string" && "userId" in payload) {
     const user = await User.findById(payload.userId);
+    // @ts-ignore
     req.user = user;
     next();
   } else {

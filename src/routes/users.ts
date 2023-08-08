@@ -84,7 +84,7 @@ router.post("/verify", async (req, res) => {
     { expiresIn: "1d" } // expires in 24 hours
   );
 
-  res.json({ message: "User verified successfully", token });
+  res.json({ message: "User verified successfully", token, user });
 });
 
 router.post("/sendcode", async (req, res) => {
@@ -126,6 +126,7 @@ router.post("/sendcode", async (req, res) => {
 router.put("/interests", authMiddleware, async (req, res) => {
   const { interests } = req.body;
 
+  // @ts-ignore
   const user = req.user;
   user.interests = interests;
 

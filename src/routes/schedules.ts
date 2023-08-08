@@ -7,7 +7,7 @@ import JoiDate from "@hapi/joi-date";
 const joi = Joi.extend(JoiDate);
 
 const scheduleSchema = joi.object({
-  date: joi.date().format("YYYY-MM-DD").required(),
+  date: joi.date().format("MM/DD/YYYY").required(),
   hour: joi
     .string()
     .pattern(/^(?:2[0-3]|[01][0-9]):[0-5][0-9]$/)
@@ -27,6 +27,7 @@ router.post("/schedules", authMiddleware, async (req, res) => {
   const { date, hour, vehicle } = req.body;
 
   const existingSchedule = await Schedule.findOne({
+    // @ts-ignore
     user: req.user.id,
     date,
     hour,
@@ -36,11 +37,12 @@ router.post("/schedules", authMiddleware, async (req, res) => {
     return res.status(400).json({ message: "Schedule already exists" });
   }
 
+  // @ts-ignore
   const schedule = new Schedule({ user: req.user.id, date, hour, vehicle });
 
   await schedule.save();
 
-  res.status(201).json({ message: "Schedule created successfully" });
+  res.status(201).json({ message: "Schedule created successfully", schedule });
 });
 
 router.delete("/schedules", authMiddleware, async (req, res) => {
@@ -53,6 +55,7 @@ router.delete("/schedules", authMiddleware, async (req, res) => {
   const { date, hour } = req.query;
 
   const schedule = await Schedule.findOneAndDelete({
+    // @ts-ignore
     user: req.user.id,
     date,
     hour,
@@ -66,6 +69,7 @@ router.delete("/schedules", authMiddleware, async (req, res) => {
 });
 
 router.get("/schedules", authMiddleware, async (req, res) => {
+  // @ts-ignore
   const schedules = await Schedule.find({ user: req.user.id });
 
   res.json(schedules);
