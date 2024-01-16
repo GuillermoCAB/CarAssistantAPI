@@ -15,9 +15,17 @@ const scheduleSchema = joi.object({
   vehicle: joi.array().items(joi.string()).required(),
 });
 
+const cancelScheduleSchema = joi.object({
+  date: joi.date().format("MM/DD/YYYY").required(),
+  hour: joi
+    .string()
+    .pattern(/^(?:2[0-3]|[01][0-9]):[0-5][0-9]$/)
+    .required(), // HH:MM format
+});
+
 const router = express.Router();
 
-router.post("/schedules", authMiddleware, async (req, res) => {
+router.post("/meeting", authMiddleware, async (req, res) => {
   const { error } = scheduleSchema.validate(req.body);
 
   if (error) {
@@ -45,8 +53,8 @@ router.post("/schedules", authMiddleware, async (req, res) => {
   res.status(201).json({ message: "Schedule created successfully", schedule });
 });
 
-router.delete("/schedules", authMiddleware, async (req, res) => {
-  const { error } = scheduleSchema.validate(req.query);
+router.delete("/meeting", authMiddleware, async (req, res) => {
+  const { error } = cancelScheduleSchema.validate(req.query);
 
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
@@ -62,13 +70,18 @@ router.delete("/schedules", authMiddleware, async (req, res) => {
   });
 
   if (!schedule) {
-    return res.status(404).json({ message: "Schedule not found" });
+    return res
+      .status(400)
+      .json({
+        message:
+          "There's no meeting scheduled for this date and time on the DB. Ask the user to check if they are correct.",
+      });
   }
 
-  res.json({ message: "Schedule deleted successfully" });
+  res.json({ message: "Schedule deleted successfully", schedule });
 });
 
-router.get("/schedules", authMiddleware, async (req, res) => {
+router.get("/meeting", authMiddleware, async (req, res) => {
   // @ts-ignore
   const schedules = await Schedule.find({ user: req.user.id });
 

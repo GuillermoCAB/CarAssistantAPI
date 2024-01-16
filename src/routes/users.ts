@@ -31,27 +31,41 @@ router.post("/register", async (req, res) => {
 
   const { name, email } = req.body;
 
-  const code = crypto.lib.WordArray.random(3).toString(crypto.enc.Hex); // generate a 6-digit code
+  const existingUser = await User.findOne({ email });
 
-  const existingCodeUser = await User.findOne({ code });
+  if (existingUser) {
+    return res.status(400).json({
+      message:
+        "User with this email already exists. Please use the verifyUser to login the user and genarete the bearer token.",
+    });
+  }
 
-  if (existingCodeUser) {
-    return res.status(400).json({ message: "Code already exists" });
+  let code = crypto.lib.WordArray.random(3).toString(crypto.enc.Hex); // generate a 6-digit code
+
+  let existingCodeUser = await User.findOne({ code });
+
+  while (existingCodeUser) {
+    code = crypto.lib.WordArray.random(3).toString(crypto.enc.Hex);
+    existingCodeUser = await User.findOne({ code });
   }
 
   const user = new User({ name, email, code });
 
   await user.save();
 
-  sendEmail(
-    email,
-    "Your verification code",
-    `Your verification code is ${code}`
-  );
+  try {
+    await sendEmail(
+      email,
+      "Your verification code",
+      `Your verification code is ${code}`
+    );
 
-  res.status(201).json({
-    message: "User created successfully, check your email for the code",
-  });
+    res.status(201).json({
+      message: "User created successfully, check your email for the code",
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 router.post("/verify", async (req, res) => {
@@ -63,13 +77,17 @@ router.post("/verify", async (req, res) => {
 
   const { email, code } = req.body;
 
+  if (!code) {
+    return res.status(400).json({ message: "Need code!" });
+  }
+
   const user = await User.findOne({ email });
 
   if (!user) {
     return res.status(400).json({ message: "User not found" });
   }
 
-  if (user.code !== code) {
+  if (user.code.toLowerCase() !== code.toLowerCase()) {
     return res.status(400).json({ message: "Invalid code" });
   }
 

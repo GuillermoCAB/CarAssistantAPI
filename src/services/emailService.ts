@@ -1,4 +1,4 @@
-import emailjs from "@emailjs/browser";
+import emailjs from "@emailjs/nodejs";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -6,8 +6,9 @@ dotenv.config();
 if (!process.env.EMAILJS_API_KEY) {
   throw new Error("EMAILJS_API_KEY must be defined");
 }
-
-emailjs.init(process.env.EMAILJS_API_KEY);
+if (!process.env.EMAILJS_API_PRIVATE_KEY) {
+  throw new Error("EMAILJS_API_PRIVATE_KEY must be defined");
+}
 
 async function sendEmail(to: string, subject: string, text: string) {
   const msg = {
@@ -16,7 +17,12 @@ async function sendEmail(to: string, subject: string, text: string) {
     text,
   };
 
-  await emailjs.send("service_j6bzfjj", "template_aj4o5t5", msg);
+  const config = {
+    publicKey: process.env.EMAILJS_API_KEY,
+    privateKey: process.env.EMAILJS_API_PRIVATE_KEY,
+  };
+
+  await emailjs.send("service_j6bzfjj", "template_aj4o5t5", msg, config);
 }
 
 export default sendEmail;
