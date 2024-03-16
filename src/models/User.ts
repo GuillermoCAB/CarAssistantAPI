@@ -21,6 +21,14 @@ const UserSchema: Schema = new Schema({
     enum: ["pendent", "active", "blocked"],
   },
   code: String,
+  locationsToDelivery: [{
+    address: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    postalCode: { type: String, required: true },
+    country: { type: String, required: true },
+    label: String,
+  }]
 });
 
 export default mongoose.model<IUser>("User", UserSchema);
